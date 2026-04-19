@@ -25,6 +25,7 @@ Window {
     height: 480
     visible: true
     title: qsTr("Hello World")
+    visibility: Window.FullScreen
 
     WebEngineView {
         anchors.fill: parent

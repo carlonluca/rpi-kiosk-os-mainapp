@@ -11,12 +11,14 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QtWebEngineQuick>
 
 int main(int argc, char** argv)
 {
     const char* urlEnvVar = "RPI_KIOSK_OS_MAIN_APP_URL";
 
     QGuiApplication app(argc, argv);
+    QtWebEngineQuick::initialize();
     QQmlApplicationEngine engine;
     QObject::connect(
         &engine,

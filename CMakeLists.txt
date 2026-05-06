@@ -40,7 +40,7 @@ set_target_properties(appRpiKioskOsMainApp PROPERTIES
 )
 
 target_link_libraries(appRpiKioskOsMainApp
-    PRIVATE Qt6::Quick
+    PRIVATE Qt6::Quick Qt6::WebEngineQuick
 )
 
 install(TARGETS appRpiKioskOsMainApp

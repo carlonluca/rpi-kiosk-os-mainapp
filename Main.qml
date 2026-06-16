@@ -19,7 +19,25 @@ Window {
     visibility: Window.FullScreen
 
     WebEngineView {
+        property bool loaded: false
+
+        id: webView
         anchors.fill: parent
         url: kioskUrl
+        onLoadingChanged: (loadingInfo) => {
+            if (loadingInfo.status !== WebEngineView.LoadSucceededStatus)
+                loaded = true
+        }
+
+        Timer {
+            running: !webView.loaded
+            triggeredOnStart: false
+            interval: 15000
+            repeat: true
+            onTriggered: {
+                console.warn("Reloading...")
+                webView.reload()
+            }
+        }
     }
 }

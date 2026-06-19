@@ -12,6 +12,34 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QtWebEngineQuick>
+#include <QQuickWindow>
+#include <signal.h>
+
+class ShotNotifier : public QObject
+{
+    Q_OBJECT
+public:
+    using QObject::QObject;
+
+    Q_INVOKABLE bool saveShot(QQuickWindow* window) {
+        const auto shot = window->grabWindow();
+        const auto currentMs = QDateTime::currentMSecsSinceEpoch();
+        const auto fileName = QString("shot_%1.png").arg(currentMs);
+        const auto path = QDir::temp().absoluteFilePath(fileName);
+        return shot.save(path);
+    }
+
+signals:
+    void shotRequested();
+};
+
+static ShotNotifier* m_notifier = nullptr;
+
+void usr1(int sig, siginfo_t* sip, void* ptr)
+{
+    if (m_notifier)
+        emit m_notifier->shotRequested();
+}
 
 int main(int argc, char** argv)
 {
@@ -27,7 +55,17 @@ int main(int argc, char** argv)
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
 
+    ShotNotifier shotNotifier;
+    m_notifier = &shotNotifier;
+
+    struct sigaction sa;
+    memset(&sa, 0, sizeof (sa));
+    sa.sa_sigaction = usr1;
+    sa.sa_flags = SA_SIGINFO;
+    sigaction(SIGUSR1, &sa, nullptr);
+
     auto* rootContext = engine.rootContext();
+    rootContext->setContextProperty("shotNotifier", &shotNotifier);
     if (qEnvironmentVariableIsSet(urlEnvVar))
         rootContext->setContextProperty("kioskUrl", qEnvironmentVariable(urlEnvVar));
     else
@@ -36,3 +74,5 @@ int main(int argc, char** argv)
 
     return QCoreApplication::exec();
 }
+
+#include "main.moc"

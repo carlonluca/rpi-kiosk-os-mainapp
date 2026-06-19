@@ -12,6 +12,7 @@ import QtQuick
 import QtWebEngine
 
 Window {
+    id: mainWindow
     width: 640
     height: 480
     visible: true
@@ -25,7 +26,7 @@ Window {
         anchors.fill: parent
         url: kioskUrl
         onLoadingChanged: (loadingInfo) => {
-            if (loadingInfo.status !== WebEngineView.LoadSucceededStatus)
+            if (loadingInfo.status === WebEngineView.LoadSucceededStatus)
                 loaded = true
         }
 
@@ -38,6 +39,14 @@ Window {
                 console.warn("Reloading...")
                 webView.reload()
             }
+        }
+    }
+
+    Connections {
+        target: shotNotifier
+        function onShotRequested() {
+            if (!shotNotifier.saveShot(mainWindow))
+                console.warn("Failed to take shot")
         }
     }
 }
